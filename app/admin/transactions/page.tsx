@@ -54,7 +54,7 @@ export default function TransactionsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Riwayat Transaksi</h1>
             <p className="text-sm text-gray-500">Laporan penjualan dan detail item</p>
