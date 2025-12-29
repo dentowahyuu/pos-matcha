@@ -48,13 +48,8 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
       return;
     }
 
-    // Generate HTML untuk item belanja
-    const itemsHtml = receipt.items.map(item => `
-      <div class="item">
-        <span>${item.name} x${item.qty}</span>
-        <span>Rp ${(item.price * item.qty).toLocaleString('id-ID')}</span>
-      </div>
-    `).join('');
+    // Helper format Rupiah
+    const formatRp = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
 
     // Template HTML Struk Thermal
     const htmlContent = `
@@ -62,6 +57,7 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
       <html>
         <head>
           <title>Struk Pembayaran</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
             body { font-family: 'Courier New', Courier, monospace; padding: 20px; max-width: 300px; margin: 0 auto; color: #000; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
@@ -74,9 +70,14 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
             .total-section { font-size: 14px; font-weight: bold; border-bottom: 1px dashed #000; padding-bottom: 15px; margin-bottom: 15px; }
             .total-row { display: flex; justify-content: space-between; margin-top: 5px; }
             .footer { text-align: center; font-size: 10px; margin-top: 20px; }
+            .no-print { display: none; }
             @media print {
+              .no-print { display: none !important; }
               @page { margin: 0; }
               body { padding: 10px; }
+            }
+            .btn-print {
+              display: block; width: 100%; padding: 12px; background: #000; color: #fff; text-align: center; border: none; margin-top: 20px; cursor: pointer; font-size: 14px; border-radius: 4px;
             }
           </style>
         </head>
@@ -102,13 +103,18 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
           </div>
 
           <div class="items">
-            ${itemsHtml}
+            ${receipt.items.map(item => `
+              <div class="item">
+                <span>${item.name} x${item.qty}</span>
+                <span>${formatRp(item.price * item.qty)}</span>
+              </div>
+            `).join('')}
           </div>
 
           <div class="total-section">
             <div class="total-row">
               <span>TOTAL</span>
-              <span>Rp ${receipt.transaction.total_price.toLocaleString('id-ID')}</span>
+              <span>${formatRp(receipt.transaction.total_price)}</span>
             </div>
           </div>
 
@@ -117,8 +123,13 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
             <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.</p>
           </div>
           
+          <!-- Tombol Manual untuk HP jika auto-print gagal -->
+          <button class="btn-print no-print" onclick="window.print()">Cetak Struk</button>
+
           <script>
-            window.onload = function() { window.print(); window.close(); }
+            window.onload = function() {
+              setTimeout(function() { window.print(); }, 500);
+            }
           </script>
         </body>
       </html>

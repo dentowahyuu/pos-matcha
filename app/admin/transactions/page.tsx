@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
+import PrintReceiptButton from '../(components)/PrintReceiptButton'
 
 interface TransactionItem {
   id: string
@@ -79,7 +80,7 @@ export default function TransactionsPage() {
                   <tr>
                     <th className="px-6 py-4">ID / Waktu</th>
                     <th className="px-6 py-4">Detail Item</th>
-                    <th className="px-6 py-4 text-right">Total</th>
+                    <th className="px-6 py-4 text-right">Total & Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -108,8 +109,21 @@ export default function TransactionsPage() {
                           ))}
                         </ul>
                       </td>
-                      <td className="px-6 py-4 align-top text-right font-bold text-gray-900">
-                        Rp {trx.total_price.toLocaleString('id-ID')}
+                      <td className="px-6 py-4 align-top text-right">
+                        <div className="font-bold text-gray-900 mb-2">Rp {trx.total_price.toLocaleString('id-ID')}</div>
+                        <PrintReceiptButton
+                          transaction={{
+                            id: trx.id,
+                            date: trx.created_at,
+                            total: trx.total_price,
+                            paymentMethod: trx.payment_method,
+                            items: trx.transaction_items.map((item) => ({
+                              name: item.products?.name || 'Produk Dihapus',
+                              price: item.price_at_time,
+                              quantity: item.quantity,
+                            })),
+                          }}
+                        />
                       </td>
                     </tr>
                   ))}
