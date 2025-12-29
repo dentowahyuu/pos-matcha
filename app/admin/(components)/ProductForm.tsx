@@ -17,22 +17,24 @@ export default function ProductForm({ categories, onSubmit, loading, initialData
   const [file, setFile] = useState<File | null>(null)
 
   // Efek: Isi form otomatis jika initialData berubah (saat tombol Edit diklik)
-    useEffect(() => {
   // Hanya jalankan logika jika memang ada data atau form perlu di-reset
-  if (initialData) {
-      setName(initialData.name);
-      setPrice(initialData.price.toString());
-      setStock(initialData.stock.toString());
-      setCategoryId(initialData.category_id);
-    setFile(null);
-  } else {
-    setName('');
-    setPrice('');
-    setStock('');
-    setCategoryId('');
-    setFile(null);
-  }
-}, [initialData]); // Dependency array sudah benar
+  // Ganti bagian useEffect Anda menjadi seperti ini:
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name ?? '');
+      setPrice(initialData.price?.toString() ?? '0');
+      setStock(initialData.stock?.toString() ?? '0');
+      // Tambahkan fallback string kosong di sini:
+      setCategoryId(initialData.category_id || ''); 
+      setFile(null);
+    } else {
+      setName('');
+      setPrice('');
+      setStock('');
+      setCategoryId('');
+      setFile(null);
+    }
+  }, [initialData]); // Dependency array sudah benar
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
