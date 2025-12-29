@@ -13,9 +13,10 @@ interface CartProps {
   onCheckout: (method: 'CASH' | 'QRIS') => Promise<Transaction | null>;
   onUpdateQty: (id: string, delta: number) => void;
   onRemove: (id: string) => void;
+  onClose?: () => void;
 }
 
-export default function Cart({ cart, onCheckout, onUpdateQty, onRemove }: CartProps) {
+export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose }: CartProps) {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'QRIS'>('CASH');
   const [receipt, setReceipt] = useState<{ transaction: Transaction, items: CartItem[] } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -128,8 +129,17 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove }: CartPr
   };
 
   return (
-    <div className="w-96 bg-white rounded-lg shadow-lg p-6 flex flex-col h-full border-l border-gray-200">
-      <h2 className="text-xl font-bold mb-4 text-black border-b pb-2">Keranjang</h2>
+    <div className="w-full md:w-96 bg-white md:rounded-lg shadow-lg p-6 flex flex-col h-full border-l border-gray-200">
+      <div className="flex justify-between items-center border-b pb-2 mb-4">
+        <h2 className="text-xl font-bold text-black">Keranjang</h2>
+        {/* Tombol Close hanya muncul di Mobile */}
+        <button 
+          onClick={onClose}
+          className="md:hidden p-2 text-gray-500 hover:text-gray-700"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
       
       <div className="flex-1 overflow-y-auto pr-2">
         {cart.length === 0 ? (

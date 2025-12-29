@@ -94,12 +94,12 @@ export default function AdminPage() {
       <div className="max-w-4xl mx-auto">
         
         {/* Header */}
-        <div className="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-black">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-black gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Panel Admin</h1>
             <p className="text-sm text-gray-500">Logged in as: {user.email}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 justify-center md:justify-end w-full md:w-auto">
             <Link 
               href="/admin/transactions" 
               className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-100 transition shadow-sm"
