@@ -39,7 +39,7 @@ export default function ProductCard({ product, onAdd }: ProductCardProps) {
           </div>
         )}
       </div>
-
+ 
       {/* Konten Teks */}
       <div className="p-3">
         <p className="font-semibold text-gray-800 truncate leading-tight">
