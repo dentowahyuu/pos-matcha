@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fcfbfa; /* Warm off-white, paper-like stone bg */
+  --foreground: #1c1d1a; /* Soft organic charcoal */
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Custom organic matcha palette */
+  --color-matcha-50: #f5f7f2;
+  --color-matcha-100: #e8edd8;
+  --color-matcha-200: #d1dbb8;
+  --color-matcha-300: #b3c791;
+  --color-matcha-400: #93b06b;
+  --color-matcha-500: #588157; /* Main Accent */
+  --color-matcha-600: #4a6b41;
+  --color-matcha-700: #3a5233;
+  --color-matcha-800: #2b3b26;
+  --color-matcha-900: #1c2619;
+  --color-matcha-950: #0e130d;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Custom scrollbar for premium touch */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e5e0;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4d4cd;
+}
+

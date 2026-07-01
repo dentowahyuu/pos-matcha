@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CartItem } from '@/types/index';
+import { Trash, Coins, QrCode, Printer, CheckCircle, X, Plus, Minus, Receipt } from '@phosphor-icons/react';
 
 interface Transaction {
   id: string;
@@ -21,14 +22,12 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
   const [receipt, setReceipt] = useState<{ transaction: Transaction, items: CartItem[] } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // TypeScript sekarang tahu item.price dan item.qty adalah number
   const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
   const handlePayment = async () => {
     if (cart.length === 0) return;
     setIsProcessing(true);
     
-    // Simpan item saat ini untuk struk karena cart akan dikosongkan oleh hook
     const currentItems = [...cart];
     const transaction = await onCheckout(paymentMethod);
     
@@ -41,17 +40,14 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
   const handlePrint = () => {
     if (!receipt) return;
 
-    // Buka jendela baru untuk struk
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Pop-up blocked. Mohon izinkan pop-up untuk mencetak struk.');
+      alert('Pop-up terblokir. Mohon izinkan pop-up untuk mencetak struk.');
       return;
     }
 
-    // Helper format Rupiah
     const formatRp = (num: number) => `Rp ${num.toLocaleString('id-ID')}`;
 
-    // Template HTML Struk Thermal
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -59,32 +55,101 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
           <title>Struk Pembayaran</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: 'Courier New', Courier, monospace; padding: 20px; max-width: 300px; margin: 0 auto; color: #000; }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-            .title { font-size: 16px; font-weight: bold; text-transform: uppercase; }
-            .subtitle { font-size: 12px; margin-top: 5px; }
-            .meta { font-size: 12px; margin-bottom: 15px; }
-            .meta-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-            .items { margin-bottom: 15px; border-bottom: 1px dashed #000; padding-bottom: 15px; }
-            .item { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
-            .total-section { font-size: 14px; font-weight: bold; border-bottom: 1px dashed #000; padding-bottom: 15px; margin-bottom: 15px; }
-            .total-row { display: flex; justify-content: space-between; margin-top: 5px; }
-            .footer { text-align: center; font-size: 10px; margin-top: 20px; }
-            .no-print { display: none; }
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              padding: 24px; 
+              max-width: 320px; 
+              margin: 0 auto; 
+              color: #1c1d1a; 
+              background: #fff;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 24px; 
+              border-bottom: 1px dashed #c0c0b8; 
+              padding-bottom: 16px; 
+            }
+            .title { 
+              font-size: 18px; 
+              font-weight: bold; 
+              text-transform: uppercase; 
+              letter-spacing: 1px;
+            }
+            .subtitle { 
+              font-size: 11px; 
+              margin-top: 6px; 
+              color: #666;
+            }
+            .meta { 
+              font-size: 11px; 
+              margin-bottom: 20px; 
+              color: #444;
+            }
+            .meta-row { 
+              display: flex; 
+              justify-content: space-between; 
+              margin-bottom: 6px; 
+            }
+            .items { 
+              margin-bottom: 20px; 
+              border-bottom: 1px dashed #c0c0b8; 
+              padding-bottom: 16px; 
+            }
+            .item { 
+              display: flex; 
+              justify-content: space-between; 
+              font-size: 11px; 
+              margin-bottom: 8px; 
+            }
+            .total-section { 
+              font-size: 14px; 
+              font-weight: bold; 
+              border-bottom: 1px dashed #c0c0b8; 
+              padding-bottom: 16px; 
+              margin-bottom: 20px; 
+            }
+            .total-row { 
+              display: flex; 
+              justify-content: space-between; 
+              margin-top: 6px; 
+            }
+            .footer { 
+              text-align: center; 
+              font-size: 10px; 
+              margin-top: 24px; 
+              color: #666;
+              line-height: 1.4;
+            }
+            .no-print { 
+              display: none; 
+            }
             @media print {
               .no-print { display: none !important; }
               @page { margin: 0; }
-              body { padding: 10px; }
+              body { padding: 12px; }
             }
             .btn-print {
-              display: block; width: 100%; padding: 12px; background: #000; color: #fff; text-align: center; border: none; margin-top: 20px; cursor: pointer; font-size: 14px; border-radius: 4px;
+              display: block; 
+              width: 100%; 
+              padding: 12px; 
+              background: #588157; 
+              color: #fff; 
+              text-align: center; 
+              border: none; 
+              margin-top: 24px; 
+              cursor: pointer; 
+              font-size: 12px; 
+              font-weight: bold;
+              border-radius: 8px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <div class="title">POS Matcha</div>
-            <div class="subtitle">Indonesia</div>
+            <div class="title">Matcha POS</div>
+            <div class="subtitle">🍃 Premium Matcha Café 🍃</div>
           </div>
           
           <div class="meta">
@@ -97,7 +162,7 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
               <span>#${receipt.transaction.id.slice(0, 8)}</span>
             </div>
             <div class="meta-row">
-              <span>Pembayaran:</span>
+              <span>Metode Bayar:</span>
               <span>${receipt.transaction.payment_method}</span>
             </div>
           </div>
@@ -120,10 +185,9 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
 
           <div class="footer">
             <p>Terima Kasih atas kunjungan Anda!</p>
-            <p>Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.</p>
+            <p>Nikmati kebaikan teh hijau premium kami setiap hari.</p>
           </div>
           
-          <!-- Tombol Manual untuk HP jika auto-print gagal -->
           <button class="btn-print no-print" onclick="window.print()">Cetak Struk</button>
 
           <script>
@@ -140,61 +204,65 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
   };
 
   return (
-    <div className="w-full md:w-96 bg-white md:rounded-lg shadow-lg p-6 flex flex-col h-full border-l border-gray-200">
-      <div className="flex justify-between items-center border-b pb-2 mb-4">
-        <h2 className="text-xl font-bold text-black">Keranjang</h2>
-        {/* Tombol Close hanya muncul di Mobile */}
-        <button 
-          onClick={onClose}
-          className="md:hidden p-2 text-gray-500 hover:text-gray-700"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
+    <div className="w-full md:w-96 bg-white border-l border-stone-200 flex flex-col h-full shadow-2xl md:shadow-none">
+      {/* Header Cart */}
+      <div className="flex justify-between items-center px-6 py-5 border-b border-stone-100 bg-stone-50/50">
+        <div className="flex items-center gap-2">
+          <Receipt size={20} className="text-matcha-600" />
+          <h2 className="text-base font-bold text-stone-900 tracking-tight">Daftar Belanja</h2>
+        </div>
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="md:hidden p-2 rounded-xl bg-white border border-stone-200 text-stone-500 hover:text-stone-700 active:scale-95 transition-all"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
       
-      <div className="flex-1 overflow-y-auto pr-2">
+      {/* List Items */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {cart.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full opacity-40">
-            <p className="mt-4">Keranjang kosong</p>
+          <div className="flex flex-col items-center justify-center h-full opacity-40 text-stone-400 py-16">
+            <Receipt size={48} weight="light" className="mb-2 text-stone-300" />
+            <p className="text-xs font-semibold tracking-wide uppercase">Keranjang kosong</p>
           </div>
         ) : (
           cart.map((item) => (
-            <div key={item.id} className="flex flex-col mb-3 text-gray-700 border-b border-gray-50 pb-2">
-              <div className="flex justify-between items-start">
+            <div key={item.id} className="flex flex-col pb-4 border-b border-stone-100 last:border-0 last:pb-0">
+              <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{item.name}</p>
-                  <p className="text-xs text-gray-500">@ Rp {item.price.toLocaleString()}</p>
+                  <p className="font-semibold text-stone-800 text-sm tracking-tight leading-tight">{item.name}</p>
+                  <p className="text-xs text-stone-400 mt-1 font-medium">@ Rp {item.price.toLocaleString('id-ID')}</p>
                 </div>
-                <p className="font-semibold text-gray-900 text-sm">
-                  Rp {(item.price * item.qty).toLocaleString()}
+                <p className="font-extrabold text-stone-900 text-sm whitespace-nowrap">
+                  Rp {(item.price * item.qty).toLocaleString('id-ID')}
                 </p>
               </div>
               
-              <div className="flex justify-between items-center mt-2">
-                <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+              <div className="flex justify-between items-center mt-3">
+                <div className="flex items-center gap-2.5 bg-stone-100 rounded-full p-1 border border-stone-200/50">
                   <button 
                     onClick={() => onUpdateQty(item.id, -1)}
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition font-bold"
+                    className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-stone-600 hover:bg-red-50 hover:text-red-600 shadow-sm border border-stone-200/40 active:scale-90 transition-all text-xs font-bold"
                   >
-                    -
+                    <Minus size={12} weight="bold" />
                   </button>
-                  <span className="text-sm font-bold w-6 text-center">{item.qty}</span>
+                  <span className="text-sm font-bold w-6 text-center text-stone-800">{item.qty}</span>
                   <button 
                     onClick={() => onUpdateQty(item.id, 1)}
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:bg-green-50 hover:text-green-600 transition font-bold"
+                    className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-stone-600 hover:bg-matcha-50 hover:text-matcha-600 shadow-sm border border-stone-200/40 active:scale-90 transition-all text-xs font-bold"
                   >
-                    +
+                    <Plus size={12} weight="bold" />
                   </button>
                 </div>
                 <button 
                   onClick={() => onRemove(item.id)}
-                  className="text-gray-400 hover:text-red-500 transition p-1"
+                  className="w-8 h-8 rounded-xl bg-stone-50 border border-stone-200/80 text-stone-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center transition-all active:scale-90"
                   title="Hapus Item"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
+                  <Trash size={16} />
                 </button>
               </div>
             </div>
@@ -202,104 +270,107 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
         )}
       </div>
 
-      <div className="border-t pt-4 mt-4">
-        {/* Pilihan Metode Pembayaran */}
-        <div className="mb-4">
-          <p className="text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran:</p>
-          <div className="grid grid-cols-2 gap-2">
+      {/* Cart Summary & Actions */}
+      <div className="border-t border-stone-200 p-6 bg-stone-50/50 space-y-5">
+        {/* Payment Methods */}
+        <div>
+          <p className="text-xs font-bold tracking-wider uppercase text-stone-400 mb-2.5">Metode Pembayaran</p>
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setPaymentMethod('CASH')}
-              className={`py-2 px-4 rounded-lg text-sm font-bold border transition-all ${
+              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold border transition-all duration-200 active:scale-[0.98] ${
                 paymentMethod === 'CASH' 
-                  ? 'bg-blue-50 border-blue-500 text-blue-700' 
-                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                  ? 'bg-matcha-600 border-matcha-600 text-white shadow-sm shadow-matcha-100' 
+                  : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
               }`}
             >
-              💵 CASH
+              <Coins size={18} />
+              <span>TUNAI</span>
             </button>
             <button
               onClick={() => setPaymentMethod('QRIS')}
-              className={`py-2 px-4 rounded-lg text-sm font-bold border transition-all ${
+              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold border transition-all duration-200 active:scale-[0.98] ${
                 paymentMethod === 'QRIS' 
-                  ? 'bg-blue-50 border-blue-500 text-blue-700' 
-                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                  ? 'bg-matcha-600 border-matcha-600 text-white shadow-sm shadow-matcha-100' 
+                  : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
               }`}
             >
-              📱 QRIS
+              <QrCode size={18} />
+              <span>QRIS</span>
             </button>
           </div>
         </div>
 
-        <div className="flex justify-between text-xl font-bold text-black mb-6">
-          <span>Total:</span>
-          <span className="text-green-600">Rp {total.toLocaleString()}</span>
+        {/* Grand Total */}
+        <div className="flex justify-between items-baseline border-t border-stone-200/60 pt-4">
+          <span className="text-sm font-bold text-stone-500 uppercase tracking-wider">Total</span>
+          <span className="text-2xl font-extrabold text-matcha-600">Rp {total.toLocaleString('id-ID')}</span>
         </div>
         
+        {/* Checkout Button */}
         <button 
           disabled={cart.length === 0 || isProcessing}
-          className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500 transition-all active:scale-95 shadow-lg shadow-green-100 disabled:shadow-none"
+          className="w-full bg-matcha-600 text-white py-4 rounded-xl font-bold hover:bg-matcha-700 disabled:bg-stone-200 disabled:text-stone-400 transition-all active:scale-[0.98] shadow-lg shadow-matcha-100 disabled:shadow-none flex items-center justify-center gap-2"
           onClick={handlePayment}
         >
           {isProcessing ? 'Memproses...' : 'BAYAR SEKARANG'}
         </button>
       </div>
 
-      {/* Modal Struk */}
+      {/* Success Receipt Modal */}
       {receipt && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden">
-            <div className="p-6 text-center border-b border-dashed border-gray-300">
-              <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-stone-150 transform transition-all">
+            <div className="p-6 text-center border-b border-dashed border-stone-200 bg-stone-50/50">
+              <div className="w-12 h-12 bg-matcha-50 text-matcha-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle size={28} weight="fill" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Pembayaran Berhasil!</h3>
-              <p className="text-sm text-gray-500 mt-1">POS Matcha Indonesia</p>
+              <h3 className="text-lg font-bold text-stone-900 tracking-tight">Pembayaran Sukses</h3>
+              <p className="text-xs text-stone-400 mt-1">🍃 POS Matcha Indonesia 🍃</p>
             </div>
             
-            <div className="p-6 bg-gray-50 space-y-4 text-sm">
-              <div className="flex justify-between text-gray-500 text-xs">
+            <div className="p-6 bg-white space-y-4 text-xs">
+              <div className="flex justify-between text-stone-400 font-medium">
                 <span>{new Date(receipt.transaction.created_at).toLocaleString('id-ID')}</span>
                 <span>#{receipt.transaction.id.slice(0, 8)}</span>
               </div>
               
-              <div className="border-t border-dashed border-gray-300 my-2"></div>
+              <div className="border-t border-dashed border-stone-200 my-2"></div>
               
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {receipt.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-gray-700">
-                    <span>{item.name} <span className="text-gray-400">x{item.qty}</span></span>
-                    <span>Rp {(item.price * item.qty).toLocaleString()}</span>
+                  <div key={idx} className="flex justify-between text-stone-700 font-medium">
+                    <span>{item.name} <span className="text-stone-400">x{item.qty}</span></span>
+                    <span className="text-stone-900 font-semibold">Rp {(item.price * item.qty).toLocaleString('id-ID')}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-dashed border-gray-300 my-2"></div>
+              <div className="border-t border-dashed border-stone-200 my-2"></div>
 
-              <div className="flex justify-between font-bold text-lg text-gray-900">
+              <div className="flex justify-between font-extrabold text-base text-stone-900 pt-1">
                 <span>Total</span>
-                <span>Rp {receipt.transaction.total_price.toLocaleString()}</span>
+                <span className="text-matcha-600">Rp {receipt.transaction.total_price.toLocaleString('id-ID')}</span>
               </div>
-              <div className="flex justify-between text-gray-600 text-xs mt-1">
-                <span>Metode Bayar</span>
-                <span className="font-semibold">{receipt.transaction.payment_method}</span>
+              <div className="flex justify-between text-stone-500 font-medium pt-1">
+                <span>Metode Pembayaran</span>
+                <span className="font-bold text-stone-850">{receipt.transaction.payment_method}</span>
               </div>
             </div>
 
-            <div className="p-4 bg-white border-t flex gap-3">
+            <div className="p-5 bg-stone-50 border-t border-stone-150 flex gap-3">
               <button 
                 onClick={handlePrint}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                className="flex-grow flex items-center justify-center gap-2 bg-matcha-600 text-white py-3 rounded-xl font-bold hover:bg-matcha-700 active:scale-95 transition-all text-xs shadow-md shadow-matcha-100"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                Cetak
+                <Printer size={16} />
+                Cetak Struk
               </button>
               <button 
                 onClick={() => setReceipt(null)}
-                className="flex-1 bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+                className="flex-grow bg-stone-900 text-white py-3 rounded-xl font-bold hover:bg-stone-800 active:scale-95 transition-all text-xs"
               >
-                Tutup & Transaksi Baru
+                Tutup
               </button>
             </div>
           </div>
@@ -307,4 +378,4 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
       )}
     </div>
   );
-}
+}
