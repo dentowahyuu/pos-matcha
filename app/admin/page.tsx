@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import { usePos } from '@/hooks/usePos'
 import Link from 'next/link'
@@ -8,6 +9,7 @@ import ProductForm from '@/app/admin/(components)/ProductForm'
 import { User } from '@supabase/supabase-js'
 import ProductTable from '@/app/admin/(components)/ProductTable'
 import { Product } from '@/types'
+import { Leaf, Storefront, Clock, Key, SignOut, Plus, Pencil, Password, ShieldWarning } from '@phosphor-icons/react'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -21,7 +23,6 @@ export default function AdminPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
 
-  // Cek Sesi Login
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -87,57 +88,81 @@ export default function AdminPage() {
     }
   }
 
-  if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  if (!user) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-stone-50 text-stone-500 font-sans gap-3">
+        <div className="w-10 h-10 border-4 border-matcha-250 border-t-matcha-600 rounded-full animate-spin"></div>
+        <span className="text-xs font-bold tracking-wider uppercase">Loading Dashboard...</span>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-[100dvh] bg-stone-50/50 text-stone-900 font-sans p-4 sm:p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm border border-gray-100 text-black gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Panel Admin</h1>
-            <p className="text-sm text-gray-500">Logged in as: {user.email}</p>
+        {/* Modern Admin Header */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-6 rounded-3xl border border-stone-200/80 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-matcha-50 text-matcha-600">
+              <Leaf size={24} weight="fill" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-stone-900 tracking-tight">Panel Pengelola</h1>
+              <p className="text-xs font-semibold text-stone-400 mt-0.5">Admin: {user.email}</p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-3 justify-center md:justify-end w-full md:w-auto">
+          <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
             <Link 
               href="/admin/transactions" 
-              className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-100 transition shadow-sm"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-stone-100/80 hover:bg-stone-200/60 text-stone-600 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm border border-stone-200/40 active:scale-[0.98]"
             >
-              📄 Riwayat
+              <Clock size={16} />
+              <span>RIWAYAT</span>
             </Link>
             <Link 
               href="/" 
-              className="bg-blue-50 text-blue-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-100 transition shadow-sm"
+              className="flex-grow sm:flex-initial flex items-center justify-center gap-2 bg-white hover:bg-stone-50 text-matcha-600 border border-stone-200 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-[0.98]"
             >
-              ← Kasir
+              <Storefront size={16} />
+              <span>APLIKASI KASIR</span>
             </Link>
             <button 
               onClick={() => setIsPasswordModalOpen(true)}
-              className="bg-yellow-50 text-yellow-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-yellow-100 transition shadow-sm"
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-white hover:bg-stone-50 text-stone-600 border border-stone-200 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-[0.98]"
             >
-              🔑 Ganti Password
+              <Key size={16} />
+              <span>PASSWORD</span>
             </button>
             <button 
               onClick={handleLogout}
-              className="bg-red-50 text-red-600 px-4 py-2 rounded-md text-sm font-semibold hover:bg-red-100 transition shadow-sm"
+              className="flex-grow sm:flex-initial flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-100 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-[0.98]"
             >
-              Logout
+              <SignOut size={16} />
+              <span>KELUAR</span>
             </button>
           </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 gap-8 text-black">
-          {/* Section Form */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-            <div className="flex justify-between items-center mb-6 border-b pb-2">
-              <h2 className="text-lg font-semibold text-gray-800">
-                {editingProduct ? `Edit Produk: ${editingProduct.name}` : 'Tambah Produk Baru'}
-              </h2>
+        {/* Dashboard Panels Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Form Panel (4 cols) */}
+          <div className="lg:col-span-5 bg-white rounded-3xl border border-stone-200/80 p-6 shadow-sm space-y-6">
+            <div className="flex justify-between items-center border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                {editingProduct ? (
+                  <Pencil size={18} className="text-matcha-600" />
+                ) : (
+                  <Plus size={18} className="text-matcha-600" />
+                )}
+                <h2 className="text-sm font-bold tracking-wider uppercase text-stone-800">
+                  {editingProduct ? 'Ubah Menu' : 'Tambah Menu'}
+                </h2>
+              </div>
               {editingProduct && (
                 <button 
                   onClick={() => setEditingProduct(null)}
-                  className="text-xs text-red-500 hover:underline"
+                  className="text-xs font-bold text-red-500 hover:text-red-600 hover:underline"
                 >
                   Batal Edit
                 </button>
@@ -152,9 +177,12 @@ export default function AdminPage() {
             />
           </div>
 
-          {/* Section Daftar Produk (Tabel) */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-            <h2 className="text-lg font-semibold mb-4 text-gray-800">Daftar Produk</h2>
+          {/* Table Panel (7 cols) */}
+          <div className="lg:col-span-7 bg-white rounded-3xl border border-stone-200/80 p-6 shadow-sm">
+            <div className="border-b border-stone-100 pb-3 mb-6">
+              <h2 className="text-sm font-bold tracking-wider uppercase text-stone-800">Daftar Menu Produk</h2>
+            </div>
+            
             <ProductTable 
               products={products} 
               onEdit={(p) => {
@@ -167,50 +195,60 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Modal Ganti Password */}
+      {/* Ganti Password Modal */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-black">
-            <h3 className="text-lg font-bold mb-4 text-gray-900">Ganti Password</h3>
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md border border-stone-150 transform transition-all space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
+                <Password size={20} weight="bold" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-stone-900 tracking-tight">Ganti Password</h3>
+                <p className="text-xs text-stone-400 font-medium">Ubah kata sandi admin Anda</p>
+              </div>
+            </div>
+            
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Password Baru</label>
+                <label className="block text-xs font-bold tracking-wider uppercase text-stone-400 mb-2">Password Baru</label>
                 <input 
                   type="password" 
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 text-sm bg-stone-50/50 border border-stone-200 rounded-2xl focus:outline-none focus:border-matcha-500 focus:ring-1 focus:ring-matcha-500 text-stone-700 placeholder-stone-400/80 transition-all font-medium"
                   required
                   minLength={6}
                   placeholder="Minimal 6 karakter"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
+                <label className="block text-xs font-bold tracking-wider uppercase text-stone-400 mb-2">Konfirmasi Password Baru</label>
                 <input 
                   type="password" 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 text-sm bg-stone-50/50 border border-stone-200 rounded-2xl focus:outline-none focus:border-matcha-500 focus:ring-1 focus:ring-matcha-500 text-stone-700 placeholder-stone-400/80 transition-all font-medium"
                   required
                   minLength={6}
-                  placeholder="Ulangi password baru"
+                  placeholder="Konfirmasi password baru"
                 />
               </div>
-              <div className="flex justify-end gap-2 mt-6">
+              
+              <div className="flex gap-3 pt-3 border-t border-stone-100">
                 <button 
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="flex-1 bg-stone-100 hover:bg-stone-250/60 text-stone-600 py-3 rounded-xl font-bold transition text-xs active:scale-95 border border-stone-200/40"
                 >
-                  Batal
+                  BATAL
                 </button>
                 <button 
                   type="submit"
                   disabled={passwordLoading}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+                  className="flex-grow bg-matcha-600 text-white py-3 rounded-xl font-bold hover:bg-matcha-700 disabled:bg-stone-200 transition text-xs shadow-md shadow-matcha-100 active:scale-95"
                 >
-                  {passwordLoading ? 'Menyimpan...' : 'Simpan Password'}
+                  {passwordLoading ? 'Menyimpan...' : 'SIMPAN PASSWORD'}
                 </button>
               </div>
             </form>
@@ -219,4 +257,4 @@ export default function AdminPage() {
       )}
     </div>
   )
-}
+}

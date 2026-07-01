@@ -1,67 +1,141 @@
 'use client'
 
 import { useState } from 'react'
-// Pastikan path import sesuai dengan struktur folder Anda
 import { usePos } from '@/hooks/usePos' 
 import ProductList from '@/app/(components)/ProductList'
 import Cart from '@/app/(components)/Cart'
 import Link from 'next/link'
+import { Leaf, Gear, ShoppingCart, MagnifyingGlass } from '@phosphor-icons/react'
 
 export default function CashierPage() {
-  // TypeScript secara otomatis mengenali tipe data dari usePos()
-  const { products, cart, addToCart, handleCheckout, updateQuantity, removeFromCart } = usePos()
+  const { products, categories, cart, addToCart, handleCheckout, updateQuantity, removeFromCart } = usePos()
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
+
+  // Filter products based on search query and category selector
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategoryId ? product.category_id === selectedCategoryId : true
+    return matchesSearch && matchesCategory
+  })
+
+  const cartItemsCount = cart.reduce((sum, item) => sum + item.qty, 0)
 
   return (
-    <main className="flex h-screen bg-gray-50 overflow-hidden relative">
-      {/* Karena ProductList sudah kita update interface-nya, 
-          ia sekarang menuntut 'products' berupa Product[] dan 
-          'onAdd' berupa fungsi yang menerima Product.
-      */}
+    <main className="flex flex-col min-h-[100dvh] bg-stone-50/50 text-stone-900 font-sans selection:bg-matcha-100 selection:text-matcha-900">
+      {/* Premium Header */}
+      <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-stone-200/80">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-matcha-50 text-matcha-600">
+            <Leaf size={22} weight="fill" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight text-stone-900">Matcha POS</h1>
+            <p className="text-xs font-medium text-stone-400">Premium Beverages Cashier</p>
+          </div>
+        </div>
 
-        <Link 
-        href="/admin" 
-        className="absolute bottom-6 left-6 z-10 flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-full shadow-sm hover:bg-gray-50 hover:text-blue-600 transition-all font-medium text-sm hidden md:flex"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        Panel Admin
-      </Link>
-      
-      {/* Link Admin untuk Mobile (Icon Only di pojok kiri atas) */}
-      <Link href="/admin" className="md:hidden absolute top-4 left-4 z-10 bg-white p-2 rounded-full shadow-md text-gray-600">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-      </Link>
+        <div className="flex items-center gap-2">
+          <Link 
+            href="/admin" 
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-stone-600 border border-stone-200/80 bg-white hover:bg-stone-50 hover:text-matcha-600 active:scale-[0.98] transition-all font-medium text-sm shadow-sm"
+          >
+            <Gear size={18} />
+            <span className="hidden sm:inline">Panel Admin</span>
+          </Link>
+        </div>
+      </header>
 
-      <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <ProductList 
-          products={products} 
-          onAdd={addToCart} 
-        />
+      {/* Main Cashier Workspace */}
+      <div className="flex-1 flex overflow-hidden relative">
+        <div className="flex-1 flex flex-col p-6 overflow-y-auto space-y-6">
+          {/* Controls Bar: Search and Category Filter Tabs */}
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+            {/* Custom Category Selection Row */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full md:w-auto scrollbar-none">
+              <button
+                onClick={() => setSelectedCategoryId(null)}
+                className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all duration-200 ${
+                  selectedCategoryId === null
+                    ? 'bg-matcha-600 border-matcha-600 text-white shadow-sm'
+                    : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                }`}
+              >
+                Semua Menu
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategoryId(cat.id)}
+                  className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all duration-200 whitespace-nowrap ${
+                    selectedCategoryId === cat.id
+                      ? 'bg-matcha-600 border-matcha-600 text-white shadow-sm'
+                      : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Custom Search Box */}
+            <div className="relative w-full md:w-72">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-stone-400">
+                <MagnifyingGlass size={18} />
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari produk matcha..."
+                className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-stone-200 rounded-full focus:outline-none focus:border-matcha-500 focus:ring-1 focus:ring-matcha-500 text-stone-700 placeholder-stone-400 shadow-sm transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Product Menu Grid */}
+          <div className="flex-1 min-h-0">
+            <ProductList 
+              products={filteredProducts} 
+              onAdd={addToCart} 
+            />
+          </div>
+        </div>
+
+        {/* Sidebar Cart View (Static on Desktop, Sliding Drawer on Mobile) */}
+        <div 
+          className={`fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-sm transition-opacity duration-300 md:static md:bg-transparent md:backdrop-blur-none md:z-auto md:w-auto ${
+            isCartOpen ? 'opacity-100' : 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto'
+          }`}
+          onClick={() => setIsCartOpen(false)}
+        >
+          <div 
+            className={`absolute right-0 top-0 bottom-0 w-full max-w-md bg-white transition-transform duration-300 ease-out md:static md:translate-x-0 ${
+              isCartOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Cart 
+              cart={cart} 
+              onCheckout={handleCheckout} 
+              onUpdateQty={updateQuantity}
+              onRemove={removeFromCart}
+              onClose={() => setIsCartOpen(false)}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Cart Wrapper: Fixed full screen on mobile, static on desktop */}
-      <div className={`fixed inset-0 z-40 bg-white transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:bg-transparent md:z-auto md:w-auto ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <Cart 
-          cart={cart} 
-          onCheckout={handleCheckout} 
-          onUpdateQty={updateQuantity}
-          onRemove={removeFromCart}
-          onClose={() => setIsCartOpen(false)}
-        />
-      </div>
-
-      {/* Floating Cart Button (Mobile Only) */}
+      {/* Floating Action Button (Mobile Only) */}
       <button 
         onClick={() => setIsCartOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 z-30 bg-green-600 text-white p-4 rounded-full shadow-xl flex items-center justify-center hover:bg-green-700 transition-colors"
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-matcha-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-matcha-700 active:scale-95 transition-all"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-        {cart.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">
-            {cart.reduce((sum, item) => sum + item.qty, 0)}
+        <ShoppingCart size={24} weight="bold" />
+        {cartItemsCount > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
+            {cartItemsCount}
           </span>
         )}
       </button>
