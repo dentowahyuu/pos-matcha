@@ -1,13 +1,14 @@
-import { Product } from '@/types/index';
+import { Product, CartItem } from '@/types/index';
 import ProductCard from './ProductCard';
 import { Coffee } from '@phosphor-icons/react';
 
 interface ProductListProps {
   products: Product[];
+  cart?: CartItem[];
   onAdd: (product: Product) => void;
 }
 
-export default function ProductList({ products, onAdd }: ProductListProps) {
+export default function ProductList({ products, cart = [], onAdd }: ProductListProps) {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
@@ -28,13 +29,18 @@ export default function ProductList({ products, onAdd }: ProductListProps) {
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {products.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              onAdd={onAdd} 
-            />
-          ))}
+          {products.map((product) => {
+            const cartItem = cart.find((item) => item.id === product.id);
+            const cartQty = cartItem ? cartItem.qty : 0;
+            return (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                cartQty={cartQty}
+                onAdd={onAdd} 
+              />
+            );
+          })}
         </div>
       )}
     </div>
