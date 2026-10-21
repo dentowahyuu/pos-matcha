@@ -2,10 +2,33 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { Product, CartItem, Category } from '@/types/index'
 
+export interface PosToast {
+  id: number
+  message: string
+  type: 'warning' | 'error' | 'success' | 'info'
+}
+
 export function usePos() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
+  const [toast, setToast] = useState<PosToast | null>(null)
+
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => {
+      setToast(null)
+    }, 3500)
+    return () => clearTimeout(timer)
+  }, [toast])
+
+  const showToast = (message: string, type: 'warning' | 'error' | 'success' | 'info' = 'warning') => {
+    setToast({ id: Date.now(), message, type })
+  }
+
+  const hideToast = () => {
+    setToast(null)
+  }
 
   useEffect(() => {
     fetchProducts()
@@ -156,7 +179,20 @@ export function usePos() {
 
   // --- LOGIKA KASIR ---
   const addToCart = (product: Product) => {
-    if (product.stock <= 0) return
+    if (product.stock <= 0) {
+      showToast(`Stok "${product.name}" sudah habis!`, 'error')
+      return
+    }
+
+    const currentItem = cart.find((item) => item.id === product.id)
+    if (currentItem && currentItem.qty >= product.stock) {
+      showToast(
+        `Stok tidak mencukupi! "${product.name}" hanya tersedia ${product.stock} pcs dan sudah ada di keranjang.`,
+        'warning'
+      )
+      return
+    }
+
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id)
       if (existing) {
@@ -170,6 +206,15 @@ export function usePos() {
   }
 
   const updateQuantity = (productId: string, delta: number) => {
+    const currentItem = cart.find((item) => item.id === productId)
+    if (currentItem && delta > 0 && currentItem.qty >= currentItem.stock) {
+      showToast(
+        `Stok "${currentItem.name}" tidak mencukupi (maksimal ${currentItem.stock} pcs).`,
+        'warning'
+      )
+      return
+    }
+
     setCart((prev) => {
       return prev.map((item) => {
         if (item.id === productId) {
@@ -237,6 +282,9 @@ export function usePos() {
     updateProduct, // Ekspos fungsi update
     deleteProduct,  // Ekspos fungsi delete
     updateQuantity,
-    removeFromCart
+    removeFromCart,
+    toast,
+    showToast,
+    hideToast
   }
 }

@@ -229,44 +229,62 @@ export default function Cart({ cart, onCheckout, onUpdateQty, onRemove, onClose 
             <p className="text-xs font-semibold tracking-wide uppercase">Keranjang kosong</p>
           </div>
         ) : (
-          cart.map((item) => (
-            <div key={item.id} className="flex flex-col pb-4 border-b border-stone-100 last:border-0 last:pb-0">
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex-1">
-                  <p className="font-semibold text-stone-800 text-sm tracking-tight leading-tight">{item.name}</p>
-                  <p className="text-xs text-stone-400 mt-1 font-medium">@ Rp {item.price.toLocaleString('id-ID')}</p>
+          cart.map((item) => {
+            const isMaxStock = item.qty >= item.stock;
+            return (
+              <div key={item.id} className="flex flex-col pb-4 border-b border-stone-100 last:border-0 last:pb-0">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <p className="font-semibold text-stone-800 text-sm tracking-tight leading-tight">{item.name}</p>
+                    <p className="text-xs text-stone-400 mt-1 font-medium">@ Rp {item.price.toLocaleString('id-ID')}</p>
+                    {isMaxStock && (
+                      <span className="inline-block text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md mt-1.5">
+                        Maks. stok ({item.stock})
+                      </span>
+                    )}
+                  </div>
+                  <p className="font-extrabold text-stone-900 text-sm whitespace-nowrap">
+                    Rp {(item.price * item.qty).toLocaleString('id-ID')}
+                  </p>
                 </div>
-                <p className="font-extrabold text-stone-900 text-sm whitespace-nowrap">
-                  Rp {(item.price * item.qty).toLocaleString('id-ID')}
-                </p>
-              </div>
-              
-              <div className="flex justify-between items-center mt-3">
-                <div className="flex items-center gap-2.5 bg-stone-100 rounded-full p-1 border border-stone-200/50">
+                
+                <div className="flex justify-between items-center mt-3">
+                  <div className="flex items-center gap-2.5 bg-stone-100 rounded-full p-1 border border-stone-200/50">
+                    <button 
+                      type="button"
+                      onClick={() => onUpdateQty(item.id, -1)}
+                      className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-stone-600 hover:bg-red-50 hover:text-red-600 shadow-sm border border-stone-200/40 active:scale-90 transition-all text-xs font-bold"
+                      title="Kurangi jumlah"
+                    >
+                      <Minus size={12} weight="bold" />
+                    </button>
+                    <span className="text-sm font-bold w-6 text-center text-stone-800">{item.qty}</span>
+                    <button 
+                      type="button"
+                      onClick={() => onUpdateQty(item.id, 1)}
+                      disabled={isMaxStock}
+                      className={`w-7 h-7 flex items-center justify-center rounded-full shadow-sm border transition-all text-xs font-bold ${
+                        isMaxStock
+                          ? 'bg-stone-100 text-stone-300 border-stone-200/50 cursor-not-allowed opacity-40'
+                          : 'bg-white text-stone-600 hover:bg-matcha-50 hover:text-matcha-600 border-stone-200/40 active:scale-90'
+                      }`}
+                      title={isMaxStock ? `Stok maksimal tercapai (${item.stock} pcs)` : 'Tambah jumlah'}
+                    >
+                      <Plus size={12} weight="bold" />
+                    </button>
+                  </div>
                   <button 
-                    onClick={() => onUpdateQty(item.id, -1)}
-                    className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-stone-600 hover:bg-red-50 hover:text-red-600 shadow-sm border border-stone-200/40 active:scale-90 transition-all text-xs font-bold"
+                    type="button"
+                    onClick={() => onRemove(item.id)}
+                    className="w-8 h-8 rounded-xl bg-stone-50 border border-stone-200/80 text-stone-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center transition-all active:scale-90"
+                    title="Hapus Item"
                   >
-                    <Minus size={12} weight="bold" />
-                  </button>
-                  <span className="text-sm font-bold w-6 text-center text-stone-800">{item.qty}</span>
-                  <button 
-                    onClick={() => onUpdateQty(item.id, 1)}
-                    className="w-7 h-7 flex items-center justify-center bg-white rounded-full text-stone-600 hover:bg-matcha-50 hover:text-matcha-600 shadow-sm border border-stone-200/40 active:scale-90 transition-all text-xs font-bold"
-                  >
-                    <Plus size={12} weight="bold" />
+                    <Trash size={16} />
                   </button>
                 </div>
-                <button 
-                  onClick={() => onRemove(item.id)}
-                  className="w-8 h-8 rounded-xl bg-stone-50 border border-stone-200/80 text-stone-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center transition-all active:scale-90"
-                  title="Hapus Item"
-                >
-                  <Trash size={16} />
-                </button>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

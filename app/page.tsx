@@ -4,11 +4,22 @@ import { useState } from 'react'
 import { usePos } from '@/hooks/usePos' 
 import ProductList from '@/app/(components)/ProductList'
 import Cart from '@/app/(components)/Cart'
+import Toast from '@/app/(components)/Toast'
 import Link from 'next/link'
 import { Leaf, Gear, ShoppingCart, MagnifyingGlass } from '@phosphor-icons/react'
 
 export default function CashierPage() {
-  const { products, categories, cart, addToCart, handleCheckout, updateQuantity, removeFromCart } = usePos()
+  const { 
+    products, 
+    categories, 
+    cart, 
+    addToCart, 
+    handleCheckout, 
+    updateQuantity, 
+    removeFromCart,
+    toast,
+    hideToast
+  } = usePos()
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
@@ -23,7 +34,10 @@ export default function CashierPage() {
   const cartItemsCount = cart.reduce((sum, item) => sum + item.qty, 0)
 
   return (
-    <main className="flex flex-col min-h-[100dvh] bg-stone-50/50 text-stone-900 font-sans selection:bg-matcha-100 selection:text-matcha-900">
+    <main className="flex flex-col min-h-[100dvh] bg-stone-50/50 text-stone-900 font-sans selection:bg-matcha-100 selection:text-matcha-900 relative">
+      {/* Toast Notification */}
+      <Toast toast={toast} onClose={hideToast} />
+
       {/* Premium Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-stone-200/80">
         <div className="flex items-center gap-3">
@@ -98,6 +112,7 @@ export default function CashierPage() {
           <div className="flex-1 min-h-0">
             <ProductList 
               products={filteredProducts} 
+              cart={cart}
               onAdd={addToCart} 
             />
           </div>
